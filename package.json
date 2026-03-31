@@ -1,0 +1,17 @@
+{
+  "name": "weather-forecast-application",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "index.js",
+  "author": "Nazrul Hasan",
+  "description": "",
+  "homepage": "https://github.com/nazrul-hasan/Weather-Forecast-Application#readme",
+  "bugs": {
+    "url": "https://github.com/nazrul-hasan/Weather-Forecast-Application/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nazrul-hasan/Weather-Forecast-Application.git"
+  }
+}
