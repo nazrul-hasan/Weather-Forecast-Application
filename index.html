@@ -11,15 +11,17 @@
         content="weather app, air quality, AQI, weather and AQI, weather forecast, 5 day forecast, check weather, city weather, location based weather, temperature, humidity, wind, simple weather app">
     <meta name="author" content="Nazrul Hasan">
     <meta name="robots" content="index, follow">
-    <script src="./assets/script.js" defer></script>
-    <link rel="stylesheet" href="./assets/output.css" />
+    <script src="./src/script.js" type="module" defer></script>
+    <link rel="stylesheet" href="./src/output.css" />
     <title>Weather & Air Quality App | Simple Weather and AQI Check</title>
 </head>
 
 <body>
-    <h1 class="text-[500px] font-bold underline text-end m-4">
-        Hello world!
-    </h1>
+    <form method="post" id="search-weather">
+        <input type="search" id="city-name" name="city-name" required />
+        <button type="submit">Search</button>
+    </form>
+    <button id="current-location">Current Location</button>
 </body>
 
 </html>
