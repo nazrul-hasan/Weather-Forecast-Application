@@ -12,6 +12,7 @@ searchByCurrentLocation.addEventListener(
 function searchFormHandler(e) {
   const formData = new FormData(e.target);
   const cityName = validateCityName(formData.get("city-name"));
+  getWeatherInfo(cityName);
   e.preventDefault();
   e.target.reset();
 }
@@ -26,22 +27,18 @@ function validateCityName(cityName) {
 
 function searchByCurrentLocationHandler() {
   navigator.geolocation.getCurrentPosition((position) => {
-    let data = weatherData.getByCurrentLocation(
-      position.coords.latitude,
-      position.coords.longitude,
-    );
-
-    console.log(data);
-    console.log(
-      data.then((result) => {
-        let forcastData = weatherData.getFiveDaysForecast(result.data.name);
-
-        let airpollutionData = weatherData.getAQIData(
-          result.data.coord.lat,
-          result.data.coord.lon,
-        );
-        console.log(airpollutionData);
-      }),
-    );
+    getWeatherInfo(position.coords.latitude, position.coords.longitude);
   });
+}
+
+async function getWeatherInfo(
+  city = "delhi",
+  latitude = undefined,
+  longitude = undefined,
+) {
+  const weatherInfo =
+    (await latitude, await longitude) === undefined
+      ? weatherData.getByCity(city)
+      : weatherData.getByCurrentLocation(latitude, longitude);
+  console.log(weatherInfo, latitude, longitude);
 }
