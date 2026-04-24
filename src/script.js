@@ -1,7 +1,9 @@
-import getWeatherData from "./getWeatherData.js";
+// `https://openweathermap.org/payload/api/media/file/${iconName}.png`
+import getWeatherInfo from "./getWeatherInfo.js";
 const searchWeatherForm = document.querySelector("#search-weather");
 const searchByCurrentLocation = document.querySelector("#current-location");
-const weatherData = getWeatherData();
+const lastSearchedCity =
+  JSON.parse(localStorage.getItem("lastSearchedCity")) || [];
 
 searchWeatherForm.addEventListener("submit", searchFormHandler);
 searchByCurrentLocation.addEventListener("click", currentLocationHandler);
@@ -30,49 +32,5 @@ function currentLocationHandler() {
       position.coords.latitude,
       position.coords.longitude,
     );
-  });
-}
-
-function getWeatherInfo(city, latitude, longitude) {
-  let allWeatherinformation = [];
-  const weatherInfo =
-    latitude === undefined && longitude === undefined
-      ? weatherData.getByCity(city)
-      : weatherData.getByCurrentLocation(latitude, longitude);
-
-  weatherInfo.then((response) => {
-    if (!response.success) {
-      console.log("Error fetching weather data: " + response.error);
-      return;
-    } else {
-      allWeatherinformation.push(response.data);
-    }
-
-    const weatherForecast = weatherData.getFiveDaysForecast(response.data.name);
-    weatherForecast.then((forecastResponse) => {
-      if (!forecastResponse.success) {
-        console.log(
-          "Error fetching weather forecast: " + forecastResponse.error,
-        );
-        return;
-      } else {
-        allWeatherinformation.push(forecastResponse.data);
-      }
-    });
-
-    const aqiData = weatherData.getAQIData(
-      response.data.coord.lat,
-      response.data.coord.lon,
-    );
-    aqiData.then((aqiResponse) => {
-      if (!aqiResponse.success) {
-        console.log("Error fetching AQI data: " + aqiResponse.error);
-        return;
-      } else {
-        allWeatherinformation.push(aqiResponse.data);
-      }
-    });
-
-    console.log(allWeatherinformation);
   });
 }
