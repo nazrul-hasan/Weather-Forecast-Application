@@ -36,5 +36,10 @@ export default function getWeatherData() {
         `${BASE_URL}forecast?q=${cityName}&appid=${API_KEY}&units=metric`,
       );
     },
+    getFiveDaysAQIForecast: async (latitude, longitude) => {
+      return await fetchData(
+        `${BASE_URL}air_pollution/forecast?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`,
+      );
+    },
   };
 }

@@ -13,7 +13,7 @@ export default function getWeatherInfo(city, latitude, longitude) {
       console.log("Error fetching weather data: " + response.error);
       return;
     } else {
-      allWeatherInformation.push(response.data);
+      allWeatherInformation[0] = response.data;
     }
 
     const weatherForecast = weatherData.getFiveDaysForecast(response.data.name);
@@ -24,7 +24,7 @@ export default function getWeatherInfo(city, latitude, longitude) {
         );
         return;
       } else {
-        allWeatherInformation.push(forecastResponse.data);
+        allWeatherInformation[1] = forecastResponse.data;
       }
     });
 
@@ -37,7 +37,23 @@ export default function getWeatherInfo(city, latitude, longitude) {
         console.log("Error fetching AQI data: " + aqiResponse.error);
         return;
       } else {
-        allWeatherInformation.push(aqiResponse.data);
+        allWeatherInformation[2] = aqiResponse.data;
+      }
+    });
+
+    const aqiForecastData = weatherData.getFiveDaysAQIForecast(
+      response.data.coord.lat,
+      response.data.coord.lon,
+    );
+
+    aqiForecastData.then((aqiForecastResponse) => {
+      if (!aqiForecastResponse.success) {
+        console.log(
+          "Error fetching AQI forecast data: " + aqiForecastResponse.error,
+        );
+        return;
+      } else {
+        allWeatherInformation[3] = aqiForecastResponse.data;
       }
     });
 
