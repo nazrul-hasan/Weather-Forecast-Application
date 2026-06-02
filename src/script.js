@@ -8,7 +8,7 @@ searchWeatherForm.addEventListener("submit", searchFormHandler);
 searchByCurrentLocation.addEventListener("click", currentLocationHandler);
 document.addEventListener(
   "load",
-  getWeatherInfo("delhi", undefined, undefined),
+  await getWeatherInfo("delhi", undefined, undefined),
 );
 
 function searchFormHandler(e) {
@@ -33,7 +33,7 @@ function validateCityName(cityName) {
 
 function currentLocationHandler() {
   navigator.geolocation.getCurrentPosition((position) => {
-    getWeatherInfo(
+    await getWeatherInfo(
       undefined,
       position.coords.latitude,
       position.coords.longitude,

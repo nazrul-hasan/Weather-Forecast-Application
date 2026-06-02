@@ -17,11 +17,54 @@
 </head>
 
 <body>
-    <form method="post" id="search-weather">
-        <input type="search" id="city-name" name="city-name" required />
-        <button type="submit">Search</button>
-    </form>
-    <button id="current-location">Current Location</button>
+    <!--Header -->
+    <header class="container mx-auto flex items-center justify-between gap-5 flex-wrap py-5 px-10">
+        <img src="./src/images/logo.webp" alt="Weather & Air Quality App Logo" class="h-12 w-auto" />
+        <div class="flex items-center justify-center gap-6">
+            <form method="post" id="search-weather"
+                class="bg-white inline-flex items-center gap-4 rounded-2xl px-1 py-1 shadow-xl">
+                <img src="./src/images/icons/Search.svg" alt="search Icon" class="w-6 h-6 ml-3" />
+                <input type="search" id="city-name" name="city-name" required placeholder="Search for a city..."
+                    class="w-100 outline-none" />
+                <button type="submit"
+                    class="bg-primary px-6 py-3 rounded-2xl text-white font-semibold cursor-pointer">Search</button>
+            </form>
+            <div id="current-location"
+                class="rounded-2xl bg-white px-6 py-3 text-black cursor-pointer font-semibold inline-flex items-center gap-2 shadow-xl">
+                <img src="./src/images/icons/Location.svg" alt="Location Icon" class="h-8 w-8" />
+                Current Location
+            </div>
+        </div>
+        <div class="inline-flex items-center text-black shadow-xl rounded-2xl">
+            <button
+                class="bg-secondary text-white px-6 py-3 rounded-tl-2xl rounded-bl-2xl font-semibold cursor-pointer">&deg;C</button>
+            <button
+                class="bg-white px-6 py-3 rounded-tr-2xl rounded-br-2xl font-semibold cursor-pointer">&deg;F</button>
+        </div>
+    </header>
+
+    <!-- Main Content-->
+    <main>
+        <!-- Recent Searches -->
+        <section class="container mx-auto px-10 flex items-center justify-start gap-5 mt-5">
+            <p class="text-base font-semibold">Recent Searches:</p>
+            <div id="recent-search" class="inline-flex items-center flex-nowrap gap-3">
+                <p class="city-pill">
+                    Delhi
+                </p>
+            </div>
+        </section>
+
+        <!-- Weather Information -->
+        <section>
+            <div></div>
+            <div></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+    </footer>
 </body>
 
 </html>

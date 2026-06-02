@@ -1,1 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "poppins", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #02245d;
+  --color-secondary: #2077c1;
+  --color-tertiary: #0398ad;
+}
+
+.city-pill {
+  @apply bg-white shadow-lg px-4 py-2 rounded-full text-base cursor-pointer
+        hover:bg-tertiary hover:text-white transition duration-300;
+}

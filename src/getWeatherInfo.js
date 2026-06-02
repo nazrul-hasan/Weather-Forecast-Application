@@ -1,62 +1,43 @@
 import getWeatherData from "./getWeatherData.js";
 const weatherData = getWeatherData();
 
-export default function getWeatherInfo(city, latitude, longitude) {
-  let allWeatherInformation = [];
-  const weatherInfo =
-    latitude !== undefined && longitude !== undefined
-      ? weatherData.getByCurrentLocation(latitude, longitude)
-      : weatherData.getByCity(city);
+export default async function getWeatherInfo(city, latitude, longitude) {
+  const weatherResponse = await (latitude !== undefined &&
+  longitude !== undefined
+    ? weatherData.getByCurrentLocation(latitude, longitude)
+    : weatherData.getByCity(city));
 
-  weatherInfo.then((response) => {
-    if (!response.success) {
-      console.log("Error fetching weather data: " + response.error);
-      return;
-    } else {
-      allWeatherInformation[0] = response.data;
-    }
+  if (!weatherResponse.success) {
+    return { success: false, error: weatherResponse.error };
+  }
 
-    const weatherForecast = weatherData.getFiveDaysForecast(response.data.name);
-    weatherForecast.then((forecastResponse) => {
-      if (!forecastResponse.success) {
-        console.log(
-          "Error fetching weather forecast: " + forecastResponse.error,
-        );
-        return;
-      } else {
-        allWeatherInformation[1] = forecastResponse.data;
-      }
-    });
+  const { name, coord } = weatherResponse.data;
+  const [forecastResponse, aqiResponse, aqiForecastResponse] =
+    await Promise.all([
+      weatherData.getFiveDaysForecast(name),
+      weatherData.getAQIData(coord.lat, coord.lon),
+      weatherData.getFiveDaysAQIForecast(coord.lat, coord.lon),
+    ]);
 
-    const aqiData = weatherData.getAQIData(
-      response.data.coord.lat,
-      response.data.coord.lon,
-    );
-    aqiData.then((aqiResponse) => {
-      if (!aqiResponse.success) {
-        console.log("Error fetching AQI data: " + aqiResponse.error);
-        return;
-      } else {
-        allWeatherInformation[2] = aqiResponse.data;
-      }
-    });
+  if (!forecastResponse.success) {
+    return { success: false, error: forecastResponse.error };
+  }
 
-    const aqiForecastData = weatherData.getFiveDaysAQIForecast(
-      response.data.coord.lat,
-      response.data.coord.lon,
-    );
+  if (!aqiResponse.success) {
+    return { success: false, error: aqiResponse.error };
+  }
 
-    aqiForecastData.then((aqiForecastResponse) => {
-      if (!aqiForecastResponse.success) {
-        console.log(
-          "Error fetching AQI forecast data: " + aqiForecastResponse.error,
-        );
-        return;
-      } else {
-        allWeatherInformation[3] = aqiForecastResponse.data;
-      }
-    });
+  if (!aqiForecastResponse.success) {
+    return { success: false, error: aqiForecastResponse.error };
+  }
 
-    console.log(allWeatherInformation);
-  });
+  return {
+    success: true,
+    data: {
+      current: weatherResponse.data,
+      forecast: forecastResponse.data,
+      aqi: aqiResponse.data,
+      aqiForecast: aqiForecastResponse.data,
+    },
+  };
 }
