@@ -1,7 +1,16 @@
 import getWeatherData from "./getWeatherData.js";
 const weatherData = getWeatherData();
 
+function getErrorIfFailed(response, label) {
+  if (!response.success) {
+    return { success: false, error: `${label}: ${response.error}` };
+  }
+
+  return { success: true };
+}
+
 export default async function getWeatherInfo(city, latitude, longitude) {
+  // Use coordinates when available, otherwise search by city name.
   const weatherResponse = await (latitude !== undefined &&
   longitude !== undefined
     ? weatherData.getByCurrentLocation(latitude, longitude)
@@ -12,6 +21,8 @@ export default async function getWeatherInfo(city, latitude, longitude) {
   }
 
   const { name, coord } = weatherResponse.data;
+
+  // Load forecast and air-quality data in parallel.
   const [forecastResponse, aqiResponse, aqiForecastResponse] =
     await Promise.all([
       weatherData.getFiveDaysForecast(name),
@@ -19,16 +30,18 @@ export default async function getWeatherInfo(city, latitude, longitude) {
       weatherData.getFiveDaysAQIForecast(coord.lat, coord.lon),
     ]);
 
-  if (!forecastResponse.success) {
-    return { success: false, error: forecastResponse.error };
-  }
+  // Error handling for each dependent response.
+  const responses = [
+    { response: forecastResponse, label: "Forecast" },
+    { response: aqiResponse, label: "AQI" },
+    { response: aqiForecastResponse, label: "AQI forecast" },
+  ];
 
-  if (!aqiResponse.success) {
-    return { success: false, error: aqiResponse.error };
-  }
-
-  if (!aqiForecastResponse.success) {
-    return { success: false, error: aqiForecastResponse.error };
+  for (const { response, label } of responses) {
+    const errorResult = getErrorIfFailed(response, label);
+    if (!errorResult.success) {
+      return errorResult;
+    }
   }
 
   return {

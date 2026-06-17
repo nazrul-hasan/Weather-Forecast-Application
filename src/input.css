@@ -9,6 +9,6 @@
 }
 
 .city-pill {
-  @apply bg-white shadow-lg px-4 py-2 rounded-full text-base cursor-pointer
+  @apply bg-white px-4 py-2 rounded-full text-base cursor-pointer
         hover:bg-tertiary hover:text-white transition duration-300;
 }

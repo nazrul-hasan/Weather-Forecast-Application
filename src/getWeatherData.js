@@ -2,6 +2,11 @@ export default function getWeatherData() {
   const API_KEY = "0a8556dacfbf0be3914d5c5563991c23";
   const BASE_URL = "https://api.openweathermap.org/data/2.5/";
 
+  /**
+   * Fetch data from the API and normalize the result.
+   * Returns an object with a success flag, plus data or error.
+   */
+
   const fetchData = async (url) => {
     try {
       const response = await fetch(url);
