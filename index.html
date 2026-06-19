@@ -12,17 +12,19 @@
     <meta name="author" content="Nazrul Hasan">
     <meta name="robots" content="index, follow">
     <script src="./src/script.js" type="module" defer></script>
+    <link rel="preload" as="image" href="./src/images/clear.webp">
     <link rel="stylesheet" href="./src/output.css" />
     <title>Weather & Air Quality App | Simple Weather and AQI Check</title>
-    <link rel="icon" type="image/x-icon" href="./src/images/favicon.ico" </head>
+    <link rel="icon" type="image/x-icon" href="./src/images/favicon.ico" />
+</head>
 
 <body>
     <!--Header -->
-    <header class=" container mx-auto flex items-center justify-between gap-5 flex-wrap pt-5 pb-2 px-5 md:px-10
+    <header class="container mx-auto flex items-center justify-between gap-5 flex-wrap pt-5 pb-2 px-5 md:px-10
     md:py-5">
         <img src="./src/images/logo.webp" alt="Weather & Air Quality App Logo"
             class="h-9 w-auto sm:h-12 drop-shadow-xl" />
-        <form method=" post" id="search-weather"
+        <form method="post" id="search-weather"
             class="bg-white inline-flex items-center gap-4 rounded-2xl px-1 py-1 shadow-xl order-3 w-[100%] xl:order-2 xl:w-auto">
             <img src="./src/images/icons/Search.svg" alt="search Icon" class="w-5 h-5 ml-3 sm:w-6 sm:h-6" />
             <input type="search" id="city-name" name="city-name" required placeholder="Search for a city..."
@@ -39,22 +41,26 @@
 
     <!-- Main Content-->
     <main>
-        <!-- Background Image -->
-        <div id="background_image_static">
-            <img src="./src/images/clear.webp" alt="Weather" class="fixed top-0 left-0 min-h-screen w-full z-[-1]">
+        <!-- Here is the background image Section -->
+        <div id="background-image-static">
+            <img src="./src/images/clear.webp" alt="Weather" class="fixed top-0 left-0 min-h-screen w-full z-[-1]"
+                role="presentation" aria-hidden="true">
         </div>
 
-        <!-- Recent Searches -->
-        <section id="recent_search_static"
+        <!-- Here is the recent searches section -->
+        <section id="recent-search-static"
             class="container mx-auto flex items-start justify-start gap-x-5 gap-y-3 mt-3 flex-col overflow-hidden flex-wrap md:mt-5 md:px-10 md:flex-row md:items-center">
             <p class="text-base font-semibold px-5 md:px-0 text-white mix-blend-difference">Recent Searches:</p>
+
+            <!-- Recent searches will be populated here -->
             <div id="recent-search"
-                class="inline-flex items-center flex-nowrap gap-3 overflow-auto pl-5 scrollbar-none md:pl-0"></div>
+                class="inline-flex items-center flex-nowrap gap-3 overflow-x-auto overflow-y-hidden whitespace-nowrap pl-5 w-full md:pl-0">
+            </div>
         </section>
 
-        <!-- Weather Information -->
+        <!-- Here is the weather information section -->
         <section class="container mx-auto px-5 md:px-10">
-            <div id="alert_static" role="alert"></div>
+            <div id="alert-static" role="alert"></div>
             <div class=" grid grid-cols-1 gap-5 mt-5 lg:grid-cols-2">
                 <div class="rounded-2xl bg-secondary/75 backdrop-blur-sm border border-solid border-white/25 p-7">
                     <div class="flex justify-between gap-5 flex-col sm:flex-row sm:items-center">
@@ -81,8 +87,9 @@
                                 data-location="current.weather[0].description"></p>
                         </div>
                         <div class="w-25 h-25 overflow-hidden flex items-center justify-center sm:w-45 sm:h-45">
-                            <img src="https://openweathermap.org/img/wn/10d@4x.png" alt="Weather Icon" class="scale-120"
-                                data-location="current.weather[0].iconUrl" />
+                            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                                alt="Weather Icon" class="scale-120" data-location="current.weather[0].iconUrl"
+                                loading="lazy" />
                         </div>
                     </div>
                     <div class="mt-7 flex items-start gap-6 flex-wrap sm:justify-between lg:justify-start">
@@ -194,11 +201,14 @@
             </div>
         </section>
 
-        <!-- Weather Forecast Information -->
+        <!-- Here is the weather forecast information section -->
         <section class="container mx-auto px-5 mt-5 mb-10 md:px-10">
             <div id="weather-forecast" class="grid grid-cols-1 gap-5 xl:grid-cols-5 sm:grid-cols-2 md:grid-cols-3">
             </div>
         </section>
+
+        <!-- Here is the toast message section -->
+        <section id="toast-message-container"></section>
     </main>
 </body>
 

@@ -26,9 +26,11 @@ async function loadDefaultWeather() {
   const weatherInfo = await getWeatherInfo(defaultCity);
   if (weatherInfo.success) {
     displayWeatherInfo(weatherInfo);
-    console.log(weatherInfo.data);
   } else {
-    console.error("Failed to load default weather:", weatherInfo.error);
+    toastMessage(
+      "error",
+      `Failed to load default weather ${weatherInfo.error}`,
+    );
   }
 }
 
@@ -46,7 +48,10 @@ async function searchFormHandler(event) {
     addRecentCity(cityName);
     event.target.reset();
   } else {
-    console.error("Search failed:", weatherInfo.error);
+    toastMessage(
+      "error",
+      `The city name is incorrect. Please correct it and re-enter.`,
+    );
   }
 }
 
@@ -58,14 +63,13 @@ function validateCityName(cityName) {
   ) {
     return cityName.trim().toLowerCase();
   }
-  console.error("The city name is incorrect");
   return null;
 }
 
 // Request the user's current location and load weather for that position.
 function currentLocationHandler() {
   if (!navigator.geolocation) {
-    console.error("Geolocation is not supported by this browser.");
+    toastMessage("error", "Geolocation is not supported by this browser.");
     return;
   }
 
@@ -80,14 +84,14 @@ function currentLocationHandler() {
       if (weatherInfo.success) {
         displayWeatherInfo(weatherInfo);
       } else {
-        console.error(
-          "Failed to load weather for current location:",
-          weatherInfo.error,
+        toastMessage(
+          "error",
+          `Failed to load weather for current location: ${weatherInfo.error}`,
         );
       }
     },
     (error) => {
-      console.error("Geolocation error:", error.message);
+      toastMessage("error", `Geolocation error: ${error.message}`);
     },
   );
 }
@@ -108,7 +112,7 @@ function addRecentCity(cityName) {
 // Render the list of recent searched cities.
 function displayRecentSearchedCities() {
   const searchedCityContainer = document.querySelector("#recent-search");
-  const searchCityStatic = document.querySelector("#recent_search_static");
+  const searchCityStatic = document.querySelector("#recent-search-static");
   searchedCityContainer.innerHTML = "";
   cities.length === 0
     ? (searchCityStatic.style.display = "none")
@@ -181,7 +185,7 @@ function updateData(data, branch = "current") {
     branchRequest.location = `${branchRequest.name}, ${new Intl.DisplayNames(["en"], { type: "region" }).of(branchRequest.sys.country)}`;
     branchRequest.dt = `${new Date(branchRequest.dt * 1000).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} | ${new Date(branchRequest.dt * 1000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}`;
     data.forecast.fiveDays = data.forecast.list.filter((item) =>
-      item.dt_txt.includes("9:00:00"),
+      item.dt_txt.includes("12:00:00"),
     );
     data.aqi.list[0].main.detailed = getDetailedAQI(
       data.aqi.list[0].components,
@@ -335,6 +339,7 @@ const AQI_map = [
   },
 ];
 
+// Calculate the air quality index
 function calculateSubIndex(cp, breakpoints) {
   const bp = breakpoints.find((b) => cp >= b.cpLo && cp <= b.cpHi);
   if (!bp) return 500;
@@ -365,6 +370,7 @@ function getDetailedAQI({ pm2_5, pm10 }) {
   };
 }
 
+// Create forecast card and render on screen
 function renderWeatherForecast(forecastData, forecastLocation) {
   const forecastCard = document.createElement("div");
   const forecastDay = document.createElement("h3");
@@ -404,9 +410,9 @@ function renderWeatherForecast(forecastData, forecastLocation) {
 
 // Set background image based on weather condition and Show alert if temprature above 40.
 function updateBackground_showAlert(condition, temp) {
-  const alertContainer = document.querySelector("#alert_static");
+  const alertContainer = document.querySelector("#alert-static");
   const backgroundImageContainer = document.querySelector(
-    "#background_image_static img",
+    "#background-image-static img",
   );
   alertContainer.innerHTML = "";
   const backgroundImage = {
@@ -448,5 +454,27 @@ function updateBackground_showAlert(condition, temp) {
     alertContainer.append(alertIcon, alertMessage);
   } else {
     alertContainer.style.display = "none";
-  } 
+  }
+}
+
+// Toast message
+function toastMessage(type = "error", message) {
+  const toastMessageContainer = document.querySelector(
+    "#toast-message-container",
+  );
+  const toastMessage = document.createElement("div");
+  toastMessage.textContent = message;
+  toastMessage.classList.add(type);
+  toastMessageContainer.appendChild(toastMessage);
+
+  setTimeout(() => {
+    toastMessage.classList.add("show");
+  }, 50);
+
+  setTimeout(() => {
+    toastMessage.classList.remove("show");
+    setTimeout(() => {
+      toastMessageContainer.removeChild(toastMessage);
+    }, 600);
+  }, 3000);
 }
