@@ -10,5 +10,48 @@
 
 .city-pill {
   @apply bg-white px-4 py-2 rounded-full text-base cursor-pointer
-        hover:bg-tertiary hover:text-white transition duration-300;
+        hover:bg-tertiary text-nowrap hover:text-white transition duration-300;
+}
+
+@layer components {
+  .weather-forecast-card {
+    @apply bg-tertiary/75 backdrop-blur-sm rounded-2xl p-7;
+
+    h3 {
+      @apply text-white font-semibold text-lg sm:text-xl;
+    }
+    p {
+      @apply text-white text-base sm:text-lg;
+    }
+
+    div:nth-of-type(1) {
+      @apply flex items-center gap-4 justify-between sm:mt-2;
+      img {
+        @apply scale-120 h-20 w-20 ml-[-10px];
+      }
+      p {
+        @apply text-4xl font-semibold;
+      }
+    }
+
+    div:nth-of-type(2) {
+      @apply flex items-center gap-3 justify-around mt-2 sm:mt-4;
+      img {
+        @apply w-5 h-5;
+      }
+      p {
+        @apply text-[16px] font-normal;
+      }
+    }
+  }
+
+  .alert-container {
+    @apply rounded-xl bg-red-50 p-6 gap-3 mt-5 shadow-xl flex-col items-start sm:flex-row sm:items-center sm:gap-5;
+    img {
+      @apply w-6 h-6 sm:w-8 sm:h-8;
+    }
+    p {
+      @apply text-red-600 text-sm sm:text-base;
+    }
+  }
 }

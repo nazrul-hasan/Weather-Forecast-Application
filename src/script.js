@@ -24,10 +24,9 @@ document.addEventListener("DOMContentLoaded", init);
 async function loadDefaultWeather() {
   const defaultCity = "delhi";
   const weatherInfo = await getWeatherInfo(defaultCity);
-
   if (weatherInfo.success) {
     displayWeatherInfo(weatherInfo);
-    console.log(weatherInfo);
+    console.log(weatherInfo.data);
   } else {
     console.error("Failed to load default weather:", weatherInfo.error);
   }
@@ -36,16 +35,12 @@ async function loadDefaultWeather() {
 // Handle city search form submission.
 async function searchFormHandler(event) {
   event.preventDefault();
-
   const formData = new FormData(event.target);
   const cityName = validateCityName(formData.get("city-name"));
-
   if (!cityName) {
     return;
   }
-
   const weatherInfo = await getWeatherInfo(cityName);
-
   if (weatherInfo.success) {
     displayWeatherInfo(weatherInfo);
     addRecentCity(cityName);
@@ -63,7 +58,6 @@ function validateCityName(cityName) {
   ) {
     return cityName.trim().toLowerCase();
   }
-
   console.error("The city name is incorrect");
   return null;
 }
@@ -114,8 +108,11 @@ function addRecentCity(cityName) {
 // Render the list of recent searched cities.
 function displayRecentSearchedCities() {
   const searchedCityContainer = document.querySelector("#recent-search");
+  const searchCityStatic = document.querySelector("#recent_search_static");
   searchedCityContainer.innerHTML = "";
-
+  cities.length === 0
+    ? (searchCityStatic.style.display = "none")
+    : (searchCityStatic.style.display = "flex");
   cities.forEach((city) => {
     const cityElement = document.createElement("p");
     cityElement.textContent = city
@@ -125,11 +122,30 @@ function displayRecentSearchedCities() {
     cityElement.classList.add("city-pill");
     searchedCityContainer.appendChild(cityElement);
   });
+
+  searchedCityContainer.addEventListener("click", displaySeachCity);
+}
+
+// Display the recent search city data
+async function displaySeachCity(event) {
+  const cityName = event.target.closest("p")?.textContent.toLowerCase();
+  if (!cityName) return;
+
+  const searchCityWeatherData = await getWeatherInfo(cityName);
+  if (searchCityWeatherData.success) {
+    displayWeatherInfo(searchCityWeatherData);
+  }
 }
 
 // Display the main weather information on the page.
 function displayWeatherInfo(weatherData) {
   const dataLocation = document.querySelectorAll("[data-location]");
+  const forecastCardContainer = document.querySelector("#weather-forecast");
+  forecastCardContainer.innerHTML = "";
+  updateBackground_showAlert(
+    weatherData.data.current.weather[0].main,
+    weatherData.data.current.main.temp,
+  );
   updateData(weatherData.data);
 
   for (let address of dataLocation) {
@@ -145,28 +161,47 @@ function displayWeatherInfo(weatherData) {
       );
     }
   }
+
+  weatherData.data.forecast.fiveDays.forEach((currentDay) => {
+    updateData(currentDay, "forecast");
+    renderWeatherForecast(currentDay, forecastCardContainer);
+  });
 }
 
 // Update the current weather object with formatted values.
-function updateData(data) {
+function updateData(data, branch = "current") {
   if (!data) {
     return;
   }
 
   const aqiColoredElement = document.querySelectorAll("#aqi-color");
+  const branchRequest = branch !== "current" ? data : data.current;
 
-  data.current.main.temp = formatTemperature(data.current.main.temp);
-  data.current.main.feels_like = formatTemperature(
-    data.current.main.feels_like,
+  if (branch === "current") {
+    branchRequest.location = `${branchRequest.name}, ${new Intl.DisplayNames(["en"], { type: "region" }).of(branchRequest.sys.country)}`;
+    branchRequest.dt = `${new Date(branchRequest.dt * 1000).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} | ${new Date(branchRequest.dt * 1000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}`;
+    data.forecast.fiveDays = data.forecast.list.filter((item) =>
+      item.dt_txt.includes("9:00:00"),
+    );
+    data.aqi.list[0].main.detailed = getDetailedAQI(
+      data.aqi.list[0].components,
+    );
+    aqiColoredElement.forEach((element) => {
+      element.style.color = data.aqi.list[0].main.detailed.color;
+    });
+  } else {
+    branchRequest.day = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+    }).format(new Date(branchRequest.dt * 1000));
+    branchRequest.date = `${new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(branchRequest.dt * 1000))}`;
+  }
+
+  branchRequest.main.temp = formatTemperature(branchRequest.main.temp);
+  branchRequest.main.feels_like = formatTemperature(
+    branchRequest.main.feels_like,
   );
-  data.current.visibility = data.current.visibility / 1000;
-  data.current.weather[0].iconUrl = `https://openweathermap.org/img/wn/${data.current.weather[0].icon}@4x.png`;
-  data.current.dt = `${new Date(data.current.dt * 1000).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} | ${new Date(data.current.dt * 1000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}`;
-  data.current.location = `${data.current.name}, ${new Intl.DisplayNames(["en"], { type: "region" }).of(data.current.sys.country)}`;
-  data.aqi.list[0].main.detailed = getDetailedAQI(data.aqi.list[0].components);
-  aqiColoredElement.forEach((element) => {
-    element.style.color = data.aqi.list[0].main.detailed.color;
-  });
+  branchRequest.visibility = branchRequest.visibility / 1000;
+  branchRequest.weather[0].iconUrl = `https://openweathermap.org/img/wn/${branchRequest.weather[0].icon}@4x.png`;
 }
 
 // Convert a temperature value from Celsius to the selected format.
@@ -178,7 +213,7 @@ function formatTemperature(celsiusValue) {
   return `${Math.round((celsiusValue * 9) / 5 + 32)}°F`;
 }
 
-//Conveter data address into useable form
+// Convert data address into useable form
 function convertDataAddress(dataAddress, rowData) {
   let convertedData = dataAddress
     .replace(/\[(\d+)\]/g, ".$1")
@@ -309,11 +344,12 @@ function calculateSubIndex(cp, breakpoints) {
   return Math.round(aqi);
 }
 
-function getDetailedAQI(components) {
-  const pm25_index = calculateSubIndex(components.pm2_5, pm25Breakpoints);
-  const pm10_index = calculateSubIndex(components.pm10, pm10Breakpoints);
+function getDetailedAQI({ pm2_5, pm10 }) {
+  const pm25_fixed = Math.round(pm2_5 * 10) / 10;
+  const pm10_fixed = Math.round(pm10);
+  const pm25_index = calculateSubIndex(pm25_fixed, pm25Breakpoints);
+  const pm10_index = calculateSubIndex(pm25_fixed, pm10Breakpoints);
   const AQI_index = Math.max(pm25_index, pm10_index);
-
   const overallAQIData =
     AQI_index > 500
       ? AQI_map[AQI_map.length - 1]
@@ -327,4 +363,90 @@ function getDetailedAQI(components) {
     recommendation: overallAQIData.recommendation,
     color: overallAQIData.color,
   };
+}
+
+function renderWeatherForecast(forecastData, forecastLocation) {
+  const forecastCard = document.createElement("div");
+  const forecastDay = document.createElement("h3");
+  const forecastDate = document.createElement("p");
+  const iconTempDiv = document.createElement("div");
+  const forecastIcon = document.createElement("img");
+  const forecastTemp = document.createElement("p");
+  const windHumidityDiv = document.createElement("div");
+  const windDiv = document.createElement("div");
+  const humidityDiv = document.createElement("div");
+  const windIcon = document.createElement("img");
+  const forecastWind = document.createElement("p");
+  const humidityIcon = document.createElement("img");
+  const forecastHumidity = document.createElement("p");
+
+  windIcon.src = "./src/images/icons/Wind.svg";
+  humidityIcon.src = "./src/images/icons/Humidity.svg";
+  forecastIcon.src = forecastData.weather[0].iconUrl;
+  forecastIcon.alt = `${forecastData.weather[0].description} Icon`;
+  humidityIcon.alt = "Humidity icon";
+  windIcon.alt = "Wind Icon";
+  forecastDay.textContent = forecastData.day;
+  forecastDate.textContent = forecastData.date;
+  forecastTemp.textContent = forecastData.main.temp;
+  forecastTemp.id = "temp-format";
+  forecastWind.textContent = `${Math.round(forecastData.wind.speed)} km/h`;
+  forecastHumidity.textContent = `${forecastData.main.humidity}%`;
+
+  iconTempDiv.append(forecastIcon, forecastTemp);
+  windDiv.append(windIcon, forecastWind);
+  humidityDiv.append(humidityIcon, forecastHumidity);
+  windHumidityDiv.append(windDiv, humidityDiv);
+  forecastCard.append(forecastDay, forecastDate, iconTempDiv, windHumidityDiv);
+  forecastCard.classList.add("weather-forecast-card");
+  forecastLocation.append(forecastCard);
+}
+
+// Set background image based on weather condition and Show alert if temprature above 40.
+function updateBackground_showAlert(condition, temp) {
+  const alertContainer = document.querySelector("#alert_static");
+  const backgroundImageContainer = document.querySelector(
+    "#background_image_static img",
+  );
+  alertContainer.innerHTML = "";
+  const backgroundImage = {
+    Clear: "clear.webp",
+    Clouds: "clouds.webp",
+    Drizzle: "drizzle.webp",
+    Rain: "rain.webp",
+    Thunderstorm: "thunderstorm.webp",
+    Snow: "snow.webp",
+    Mist: "smoke_mist_haze.webp",
+    Smoke: "smoke_mist_haze.webp",
+    Haze: "smoke_mist_haze.webp",
+    Dust: "dust_sand_ash_squall_tornado.webp",
+    Sand: "dust_sand_ash_squall_tornado.webp",
+    Ash: "dust_sand_ash_squall_tornado.webp",
+    Squall: "dust_sand_ash_squall_tornado.webp",
+    Tornado: "dust_sand_ash_squall_tornado.webp",
+  };
+
+  if (backgroundImage[condition]) {
+    backgroundImageContainer.src = `./src/images/${backgroundImage[condition]}`;
+  }
+
+  if (temp >= 40) {
+    alertContainer.style.display = "flex";
+    alertContainer.classList.add("alert-container");
+    const alertMessage = document.createElement("p");
+    const messageTemp = document.createElement("span");
+    const alertIcon = document.createElement("img");
+    alertIcon.src = "./src/images/Icons/alert.svg";
+    alertIcon.alt = "alert Icon";
+    messageTemp.textContent = formatTemperature(temp);
+    messageTemp.setAttribute("id", "temp-format");
+    alertMessage.textContent = `Current temperature is `;
+    alertMessage.append(messageTemp);
+    alertMessage.append(
+      ` with ${condition.toLowerCase()} conditions. The weather is extremely hot and staying outside for long periods may cause dehydration or exhaustion. Drink plenty of water, avoid unnecessary sun exposure, and try to stay cool.`,
+    );
+    alertContainer.append(alertIcon, alertMessage);
+  } else {
+    alertContainer.style.display = "none";
+  } 
 }

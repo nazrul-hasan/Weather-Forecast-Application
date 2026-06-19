@@ -23,18 +23,15 @@ export default async function getWeatherInfo(city, latitude, longitude) {
   const { name, coord } = weatherResponse.data;
 
   // Load forecast and air-quality data in parallel.
-  const [forecastResponse, aqiResponse, aqiForecastResponse] =
-    await Promise.all([
-      weatherData.getFiveDaysForecast(name),
-      weatherData.getAQIData(coord.lat, coord.lon),
-      weatherData.getFiveDaysAQIForecast(coord.lat, coord.lon),
-    ]);
+  const [forecastResponse, aqiResponse] = await Promise.all([
+    weatherData.getFiveDaysForecast(name),
+    weatherData.getAQIData(coord.lat, coord.lon),
+  ]);
 
   // Error handling for each dependent response.
   const responses = [
     { response: forecastResponse, label: "Forecast" },
     { response: aqiResponse, label: "AQI" },
-    { response: aqiForecastResponse, label: "AQI forecast" },
   ];
 
   for (const { response, label } of responses) {
@@ -50,7 +47,6 @@ export default async function getWeatherInfo(city, latitude, longitude) {
       current: weatherResponse.data,
       forecast: forecastResponse.data,
       aqi: aqiResponse.data,
-      aqiForecast: aqiForecastResponse.data,
     },
   };
 }
